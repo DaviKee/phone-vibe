@@ -1,17 +1,22 @@
 # 在 Windows 上继续这个项目
 
-这个包里有三部分：手机端（Android/Kotlin）、电脑端（C# WinForms）、已经编译好的成品。
+仓库里有三部分：手机端（Android/Kotlin）、电脑端（C# WinForms）、命令行调试工具。编译产物（exe / apk）不随仓库分发。
 
 ---
 
 ## 一、只想跑起来（不写代码）
 
-解压后进 `bin\`：
+需要两个二进制：`VoiceKeyBridge.exe`（电脑端）和 `VoiceKey-bridge-debug.apk`（手机端）。仓库里没有，按下面任一方式获取：
+
+- 自己编译（见第二、四节）
+- 或从本地保留的构建产物里取（如果之前已经生成过）
+
+拿到后：
 
 1. 双击 `VoiceKeyBridge.exe`（无需装 .NET，运行时已打包）
 2. SmartScreen 拦截 → 「更多信息」→「仍要运行」
 3. 防火墙弹窗 → **勾上「专用网络」** → 允许
-4. 手机装 `VoiceKey-bridge-debug.apk`，两端传输方式选同一个
+4. 手机装 APK，两端传输方式选同一个
 
 ---
 
@@ -36,10 +41,10 @@ VS Code 里装扩展 `C# Dev Kit`。
 
 ### 打开与运行
 
-- **VS**：直接 `文件 → 打开 → 项目/解决方案`，选 `VoiceKeyBridge.Win\VoiceKeyBridge.Win.csproj`，F5 直接跑
-- **命令行**（在包根目录）：
+- **VS**：直接 `文件 → 打开 → 项目/解决方案`，选 `pc\VoiceKeyBridge.Win\VoiceKeyBridge.Win.csproj`，F5 直接跑
+- **命令行**（在仓库根目录）：
   ```powershell
-  dotnet run --project VoiceKeyBridge.Win
+  dotnet run --project pc/VoiceKeyBridge.Win
   ```
 
 首次会还原 NAudio 包，几十秒。之后改代码直接 F5。
@@ -47,7 +52,7 @@ VS Code 里装扩展 `C# Dev Kit`。
 ### 重新打包成单文件 exe
 
 ```powershell
-dotnet publish VoiceKeyBridge.Win -c Release -r win-x64 --self-contained true -o out
+dotnet publish pc/VoiceKeyBridge.Win -c Release -r win-x64 --self-contained true -o out
 ```
 产物在 `out\VoiceKeyBridge.exe`，约 70 MB。
 
@@ -56,7 +61,7 @@ dotnet publish VoiceKeyBridge.Win -c Release -r win-x64 --self-contained true -o
 ## 三、代码在哪、改什么
 
 ```
-VoiceKeyBridge.Win\
+pc\VoiceKeyBridge.Win\
 ├── Program.cs        入口，启动窗体
 ├── MainForm.cs       全部界面逻辑：布局、配置读写、日志、电平条   ← 改 UI 看这里
 ├── UdpReceiver.cs    UDP 收包（默认通道）
@@ -99,9 +104,10 @@ winget install Google.AndroidStudio
 | `Cfg.kt` | 阈值（300ms / 600ms）、传输方式、端口 |
 | `UdpSender.kt` / `BleSender.kt` | 两个通道的实现 |
 
-编译 APK：
+编译 APK（工程未提交 Gradle Wrapper，先本地生成一次，或直接用 AS 的 Build 菜单）：
 ```powershell
 cd android
+gradle wrapper          # 只需执行一次
 .\gradlew assembleDebug
 ```
 
